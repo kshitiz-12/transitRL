@@ -1,0 +1,40 @@
+# OpenEnv-style metadata for TransitRL (HTTP + FastAPI)
+spec_version: "1"
+
+name: TransitRL
+description: Real-world ride-hailing RL environment for driver-rider assignment under wait-time and demand-supply constraints.
+
+runtime: fastapi
+app: app:app
+port: 8000
+
+action_space:
+  type: object
+  schema:
+    driver_id: integer
+    rider_id: integer
+  description: >
+    Pair (driver_id, rider_id) assigning an idle driver to a waiting rider.
+    Invalid pairs, busy drivers, or pairs with Manhattan distance > 6 are rejected or penalized.
+
+observation_space:
+  type: object
+  schema:
+    drivers: array
+    riders: array
+    time: integer
+  description: >
+    drivers entries include id, x, y, busy, idle_time; riders include id, x, y, wait_time; time is global clock.
+
+tasks:
+  - id: easy
+    summary: Low demand, many drivers (easy matching).
+  - id: medium
+    summary: Balanced demand and supply.
+  - id: hard
+    summary: Peak-hour surge — high demand, limited drivers, slower completions.
+
+endpoints:
+  - POST /reset
+  - POST /step
+  - GET /state

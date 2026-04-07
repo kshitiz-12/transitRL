@@ -1,0 +1,22 @@
+[project]
+name = "transitrl"
+version = "0.1.0"
+description = "TransitRL environment"
+authors = [
+  { name = "Kshitiz Vishwakarma" }
+]
+
+dependencies = [
+  "fastapi",
+  "uvicorn",
+  "pydantic",
+  "openai",
+  "openenv-core>=0.2.0"
+]
+
+[project.scripts]
+server = "server.app:main"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
