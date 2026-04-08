@@ -63,6 +63,8 @@ def list_tasks_with_graders() -> list[Dict[str, Any]]:
                 "description": TASK_DESCRIPTIONS[task_id],
                 "difficulty": task_id,
                 "grader": "grader:evaluate",
+                "graders": ["grader:evaluate"],
+                "has_grader": True,
                 "enabled": True,
             }
         )

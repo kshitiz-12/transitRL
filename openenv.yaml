@@ -34,6 +34,9 @@ tasks:
     reset_payload:
       task: easy
     grader: grader:evaluate
+    graders:
+      - grader:evaluate
+    has_grader: true
     enabled: true
   - id: medium
     name: TransitRL Medium
@@ -42,6 +45,9 @@ tasks:
     reset_payload:
       task: medium
     grader: grader:evaluate
+    graders:
+      - grader:evaluate
+    has_grader: true
     enabled: true
   - id: hard
     name: TransitRL Hard
@@ -50,7 +56,21 @@ tasks:
     reset_payload:
       task: hard
     grader: grader:evaluate
+    graders:
+      - grader:evaluate
+    has_grader: true
     enabled: true
+
+graders:
+  - task_id: easy
+    enabled: true
+    entrypoint: grader:evaluate
+  - task_id: medium
+    enabled: true
+    entrypoint: grader:evaluate
+  - task_id: hard
+    enabled: true
+    entrypoint: grader:evaluate
 
 endpoints:
   health: GET /health
