@@ -1,58 +1,51 @@
-"""
-Run a short episode with a simple greedy policy and print the grader score.
-Works offline (direct env API, no HTTP).
-"""
-
-from __future__ import annotations
-
 import os
 import random
-from typing import List, Tuple
 
+# ---------------- SAFE OPENAI IMPORT ----------------
+try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
+
+# ---------------- ENV IMPORTS ----------------
 from env import TransitEnv
 from grader import evaluate
 from tasks import TASK_MEDIUM
 
-# ------------------ ENV VARIABLES ------------------
-API_BASE_URL = os.getenv("API_BASE_URL", "")
-MODEL_NAME = os.getenv("MODEL_NAME", "")
-HF_TOKEN = os.getenv("HF_TOKEN")  # no default
+# ---------------- ENV VARIABLES ----------------
+API_BASE_URL = os.getenv("API_BASE_URL")
+MODEL_NAME = os.getenv("MODEL_NAME")
+HF_TOKEN = os.getenv("HF_TOKEN")
 
-# ------------------ OPENAI CLIENT ------------------
-from openai import OpenAI
+# optional client (safe)
+if OpenAI and HF_TOKEN:
+    client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
+else:
+    client = None
 
-client = None
-if HF_TOKEN:
-    client = OpenAI(
-        base_url=API_BASE_URL,
-        api_key=HF_TOKEN
-    )
 
-# ------------------ LOGGING ------------------
-def log_step(step, action, reward):
-    print(f"STEP {step} | action={action} | reward={reward}")
-
-# ------------------ LOGIC ------------------
-def _manhattan(ax: int, ay: int, bx: int, by: int) -> int:
+# ---------------- HELPER ----------------
+def manhattan(ax, ay, bx, by):
     return abs(ax - bx) + abs(ay - by)
 
 
-def greedy_valid_action(env: TransitEnv, rng: random.Random) -> Tuple[int, int]:
-    candidates: List[Tuple[int, int, int]] = []
+def greedy_action(env, rng):
+    candidates = []
+
     for d in env.drivers:
         if d.busy:
             continue
         for r in env.riders:
-            dist = _manhattan(d.x, d.y, r.x, r.y)
+            dist = manhattan(d.x, d.y, r.x, r.y)
             if dist <= 6:
                 candidates.append((d.id, r.id, dist))
 
     if candidates:
-        candidates.sort(key=lambda t: t[2])
-        best_d = candidates[0][2]
-        best = [c for c in candidates if c[2] == best_d]
-        pick = rng.choice(best)
-        return pick[0], pick[1]
+        candidates.sort(key=lambda x: x[2])
+        best_dist = candidates[0][2]
+        best = [c for c in candidates if c[2] == best_dist]
+        d_id, r_id, _ = rng.choice(best)
+        return d_id, r_id
 
     if env.drivers and env.riders:
         return rng.choice(env.drivers).id, rng.choice(env.riders).id
@@ -60,10 +53,8 @@ def greedy_valid_action(env: TransitEnv, rng: random.Random) -> Tuple[int, int]:
     return 0, 0
 
 
-# ------------------ MAIN ------------------
-def main() -> None:
-    print("START")
-
+# ---------------- MAIN ----------------
+def main():
     rng = random.Random()
 
     env = TransitEnv(task_config=TASK_MEDIUM)
@@ -73,27 +64,39 @@ def main() -> None:
     max_steps = 45
     step_count = 0
 
-    for _ in range(max_steps):
-        if done or not env.riders:
-            break
+    # 🔥 STRICT FORMAT START
+    print("[START] task=transitrl", flush=True)
 
-        if rng.random() < 0.20:
-            d = rng.choice([x for x in env.drivers if not x.busy] or env.drivers)
-            r = rng.choice(env.riders)
-            action = (d.id, r.id)
-        else:
-            action = greedy_valid_action(env, rng)
+    try:
+        for _ in range(max_steps):
+            if done or not env.riders:
+                break
 
-        _, reward, done = env.step(action)
+            if rng.random() < 0.2:
+                available = [x for x in env.drivers if not x.busy] or env.drivers
+                d = rng.choice(available)
+                r = rng.choice(env.riders)
+                action = (d.id, r.id)
+            else:
+                action = greedy_action(env, rng)
 
-        log_step(step_count, action, reward)
-        step_count += 1
+            _, reward, done = env.step(action)
 
-    score = evaluate(env)
+            step_count += 1
 
-    print(f"END | score={score:.4f}")
+            # 🔥 STRICT STEP FORMAT
+            print(f"[STEP] step={step_count} reward={reward:.4f}", flush=True)
+
+        score = evaluate(env)
+
+        # 🔥 STRICT END FORMAT
+        print(f"[END] task=transitrl score={score:.4f} steps={step_count}", flush=True)
+
+    except Exception:
+        # 💀 NEVER CRASH
+        print(f"[END] task=transitrl score=0.0000 steps={step_count}", flush=True)
 
 
-# ------------------
+# ---------------- RUN ----------------
 if __name__ == "__main__":
     main()
