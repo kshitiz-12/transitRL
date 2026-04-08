@@ -67,6 +67,52 @@ def get_tasks() -> list[dict]:
     return list_tasks_with_graders()
 
 
+@app.get("/metadata", status_code=200)
+def metadata() -> dict:
+    """OpenEnv discovery: name + description."""
+    return {
+        "name": "TransitRL",
+        "description": (
+            "Ride-hailing RL environment: assign drivers to riders on a grid with "
+            "demand dynamics, fairness, and scoring via grader.evaluate."
+        ),
+    }
+
+
+@app.get("/schema", status_code=200)
+def schema() -> dict:
+    """JSON-schema-style shapes for action, observation, and episode state."""
+    return {
+        "action": {
+            "type": "object",
+            "required": ["driver_id", "rider_id"],
+            "properties": {
+                "driver_id": {"type": "integer"},
+                "rider_id": {"type": "integer"},
+            },
+        },
+        "observation": {
+            "type": "object",
+            "required": ["drivers", "riders", "time"],
+            "properties": {
+                "drivers": {"type": "array"},
+                "riders": {"type": "array"},
+                "time": {"type": "integer"},
+            },
+        },
+        "state": {
+            "type": "object",
+            "required": ["drivers", "riders", "time"],
+            "properties": {
+                "drivers": {"type": "array"},
+                "riders": {"type": "array"},
+                "time": {"type": "integer"},
+            },
+        },
+    }
+
+
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok"}
+    # OpenEnv runtime checks expect status == "healthy"
+    return {"status": "healthy"}

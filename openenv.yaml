@@ -1,12 +1,12 @@
-# OpenEnv-style metadata for TransitRL (HTTP + FastAPI)
-spec_version: "1"
+# OpenEnv manifest — keep in sync with Dockerfile port and app entrypoint.
+spec_version: 1
 
 name: TransitRL
 description: Real-world ride-hailing RL environment for driver-rider assignment under wait-time and demand-supply constraints.
 
 runtime: fastapi
 app: app:app
-port: 8000
+port: 7860
 
 action_space:
   type: object
@@ -15,7 +15,6 @@ action_space:
     rider_id: integer
   description: >
     Pair (driver_id, rider_id) assigning an idle driver to a waiting rider.
-    Invalid pairs, busy drivers, or pairs with Manhattan distance > 6 are rejected or penalized.
 
 observation_space:
   type: object
@@ -24,8 +23,9 @@ observation_space:
     riders: array
     time: integer
   description: >
-    drivers entries include id, x, y, busy, idle_time; riders include id, x, y, wait_time; time is global clock.
+    drivers include id, x, y, busy, idle_time, rides_completed; riders include id, x, y, wait_time.
 
+# Three graded tasks — each has a real on-disk grader module under graders/.
 tasks:
   - id: easy
     name: TransitRL Easy
@@ -35,11 +35,14 @@ tasks:
     reward_range: [0.0, 1.0]
     reset_payload:
       task: easy
-    grader: graders:grade_easy
+    grader: "graders.easy:evaluate"
+    grader_path: graders/easy.py
+    grader_entrypoint: evaluate
     graders:
-      - graders:grade_easy
+      - "graders.easy:evaluate"
     has_grader: true
     enabled: true
+
   - id: medium
     name: TransitRL Medium
     description: Balanced demand and supply.
@@ -48,11 +51,14 @@ tasks:
     reward_range: [0.0, 1.0]
     reset_payload:
       task: medium
-    grader: graders:grade_medium
+    grader: "graders.medium:evaluate"
+    grader_path: graders/medium.py
+    grader_entrypoint: evaluate
     graders:
-      - graders:grade_medium
+      - "graders.medium:evaluate"
     has_grader: true
     enabled: true
+
   - id: hard
     name: TransitRL Hard
     description: Peak-hour surge with high demand, limited drivers, slower completions.
@@ -61,25 +67,32 @@ tasks:
     reward_range: [0.0, 1.0]
     reset_payload:
       task: hard
-    grader: graders:grade_hard
+    grader: "graders.hard:evaluate"
+    grader_path: graders/hard.py
+    grader_entrypoint: evaluate
     graders:
-      - graders:grade_hard
+      - "graders.hard:evaluate"
     has_grader: true
     enabled: true
 
 graders:
   - task_id: easy
     enabled: true
-    entrypoint: graders:grade_easy
+    entrypoint: "graders.easy:evaluate"
+    path: graders/easy.py
   - task_id: medium
     enabled: true
-    entrypoint: graders:grade_medium
+    entrypoint: "graders.medium:evaluate"
+    path: graders/medium.py
   - task_id: hard
     enabled: true
-    entrypoint: graders:grade_hard
+    entrypoint: "graders.hard:evaluate"
+    path: graders/hard.py
 
 endpoints:
   health: GET /health
+  metadata: GET /metadata
+  schema: GET /schema
   reset: POST /reset
   step: POST /step
   state: GET /state

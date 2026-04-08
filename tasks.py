@@ -55,10 +55,16 @@ def list_tasks_with_graders() -> list[Dict[str, Any]]:
     Expose at least three tasks with explicit grader wiring for validators.
     """
     result: list[Dict[str, Any]] = []
+    # One module per task (graders/easy.py, …) — validators often require distinct files.
     grader_map = {
-        "easy": "graders:grade_easy",
-        "medium": "graders:grade_medium",
-        "hard": "graders:grade_hard",
+        "easy": "graders.easy:evaluate",
+        "medium": "graders.medium:evaluate",
+        "hard": "graders.hard:evaluate",
+    }
+    grader_paths = {
+        "easy": "graders/easy.py",
+        "medium": "graders/medium.py",
+        "hard": "graders/hard.py",
     }
     for task_id in ("easy", "medium", "hard"):
         task_cfg = TASKS[task_id]
@@ -72,6 +78,8 @@ def list_tasks_with_graders() -> list[Dict[str, Any]]:
                 "max_steps": int(task_cfg.get("max_steps", 50)),
                 "reward_range": [0.0, 1.0],
                 "grader": grader_map[task_id],
+                "grader_path": grader_paths[task_id],
+                "grader_entrypoint": "evaluate",
                 "graders": [grader_map[task_id]],
                 "has_grader": True,
                 "enabled": True,
