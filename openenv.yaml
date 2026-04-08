@@ -29,10 +29,19 @@ observation_space:
 tasks:
   - id: easy
     summary: Low demand, many drivers (easy matching).
+    reset_payload:
+      task: easy
+    grader: grader:evaluate
   - id: medium
     summary: Balanced demand and supply.
+    reset_payload:
+      task: medium
+    grader: grader:evaluate
   - id: hard
     summary: Peak-hour surge — high demand, limited drivers, slower completions.
+    reset_payload:
+      task: hard
+    grader: grader:evaluate
 
 endpoints:
   - POST /reset
