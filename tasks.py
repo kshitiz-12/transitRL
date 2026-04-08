@@ -62,6 +62,7 @@ def list_tasks_with_graders() -> list[Dict[str, Any]]:
                 "name": f"TransitRL {task_id.title()}",
                 "description": TASK_DESCRIPTIONS[task_id],
                 "difficulty": task_id,
+                "reward_range": [0.0, 1.0],
                 "grader": "grader:evaluate",
                 "graders": ["grader:evaluate"],
                 "has_grader": True,
