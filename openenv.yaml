@@ -29,48 +29,54 @@ observation_space:
 tasks:
   - id: easy
     name: TransitRL Easy
-    summary: Low demand, many drivers (easy matching).
+    description: Low demand, many drivers (easy matching).
     difficulty: easy
+    max_steps: 50
+    reward_range: [0.0, 1.0]
     reset_payload:
       task: easy
-    grader: grader:evaluate
+    grader: graders:grade_easy
     graders:
-      - grader:evaluate
+      - graders:grade_easy
     has_grader: true
     enabled: true
   - id: medium
     name: TransitRL Medium
-    summary: Balanced demand and supply.
+    description: Balanced demand and supply.
     difficulty: medium
+    max_steps: 50
+    reward_range: [0.0, 1.0]
     reset_payload:
       task: medium
-    grader: grader:evaluate
+    grader: graders:grade_medium
     graders:
-      - grader:evaluate
+      - graders:grade_medium
     has_grader: true
     enabled: true
   - id: hard
     name: TransitRL Hard
-    summary: Peak-hour surge — high demand, limited drivers, slower completions.
+    description: Peak-hour surge with high demand, limited drivers, slower completions.
     difficulty: hard
+    max_steps: 50
+    reward_range: [0.0, 1.0]
     reset_payload:
       task: hard
-    grader: grader:evaluate
+    grader: graders:grade_hard
     graders:
-      - grader:evaluate
+      - graders:grade_hard
     has_grader: true
     enabled: true
 
 graders:
   - task_id: easy
     enabled: true
-    entrypoint: grader:evaluate
+    entrypoint: graders:grade_easy
   - task_id: medium
     enabled: true
-    entrypoint: grader:evaluate
+    entrypoint: graders:grade_medium
   - task_id: hard
     enabled: true
-    entrypoint: grader:evaluate
+    entrypoint: graders:grade_hard
 
 endpoints:
   health: GET /health

@@ -55,16 +55,24 @@ def list_tasks_with_graders() -> list[Dict[str, Any]]:
     Expose at least three tasks with explicit grader wiring for validators.
     """
     result: list[Dict[str, Any]] = []
+    grader_map = {
+        "easy": "graders:grade_easy",
+        "medium": "graders:grade_medium",
+        "hard": "graders:grade_hard",
+    }
     for task_id in ("easy", "medium", "hard"):
+        task_cfg = TASKS[task_id]
         result.append(
             {
                 "id": task_id,
                 "name": f"TransitRL {task_id.title()}",
                 "description": TASK_DESCRIPTIONS[task_id],
                 "difficulty": task_id,
+                "task": task_id,
+                "max_steps": int(task_cfg.get("max_steps", 50)),
                 "reward_range": [0.0, 1.0],
-                "grader": "grader:evaluate",
-                "graders": ["grader:evaluate"],
+                "grader": grader_map[task_id],
+                "graders": [grader_map[task_id]],
                 "has_grader": True,
                 "enabled": True,
             }
