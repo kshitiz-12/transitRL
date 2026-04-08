@@ -28,22 +28,33 @@ observation_space:
 
 tasks:
   - id: easy
+    name: TransitRL Easy
     summary: Low demand, many drivers (easy matching).
+    difficulty: easy
     reset_payload:
       task: easy
     grader: grader:evaluate
+    enabled: true
   - id: medium
+    name: TransitRL Medium
     summary: Balanced demand and supply.
+    difficulty: medium
     reset_payload:
       task: medium
     grader: grader:evaluate
+    enabled: true
   - id: hard
+    name: TransitRL Hard
     summary: Peak-hour surge — high demand, limited drivers, slower completions.
+    difficulty: hard
     reset_payload:
       task: hard
     grader: grader:evaluate
+    enabled: true
 
 endpoints:
-  - POST /reset
-  - POST /step
-  - GET /state
+  health: GET /health
+  reset: POST /reset
+  step: POST /step
+  state: GET /state
+  tasks: GET /tasks

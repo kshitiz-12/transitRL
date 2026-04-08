@@ -10,7 +10,7 @@ from fastapi import Body, FastAPI, HTTPException
 
 from env import TransitEnv
 from models import ResetRequest, ResetResponse, StateResponse
-from tasks import get_task
+from tasks import get_task, list_tasks_with_graders
 
 app = FastAPI(title="TransitRL", version="1.0.0")
 
@@ -57,6 +57,14 @@ def get_state() -> StateResponse:
     env = _ensure_env()
     state = env.get_state()
     return StateResponse(**state)
+
+
+@app.get("/tasks", status_code=200)
+def get_tasks() -> dict:
+    """
+    Task catalog for OpenEnv validators.
+    """
+    return {"tasks": list_tasks_with_graders()}
 
 
 @app.get("/health")

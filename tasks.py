@@ -38,7 +38,32 @@ TASKS = {
     "hard": TASK_HARD,
 }
 
+TASK_DESCRIPTIONS: Dict[str, str] = {
+    "easy": "Low demand and high driver availability.",
+    "medium": "Balanced rider demand and driver supply.",
+    "hard": "Peak-hour surge with high demand and limited drivers.",
+}
+
 
 def get_task(name: str) -> Dict[str, Any]:
     """Return task config by name; defaults to medium if unknown."""
     return TASKS.get(name.lower(), TASK_MEDIUM)
+
+
+def list_tasks_with_graders() -> list[Dict[str, Any]]:
+    """
+    Expose at least three tasks with explicit grader wiring for validators.
+    """
+    result: list[Dict[str, Any]] = []
+    for task_id in ("easy", "medium", "hard"):
+        result.append(
+            {
+                "id": task_id,
+                "name": f"TransitRL {task_id.title()}",
+                "description": TASK_DESCRIPTIONS[task_id],
+                "difficulty": task_id,
+                "grader": "grader:evaluate",
+                "enabled": True,
+            }
+        )
+    return result
