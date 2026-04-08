@@ -60,13 +60,11 @@ def get_state() -> StateResponse:
 
 
 @app.get("/tasks", status_code=200)
-def get_tasks() -> dict:
+def get_tasks() -> list[dict]:
     """
     Task catalog for OpenEnv validators.
     """
-    tasks = list_tasks_with_graders()
-    # Provide both list and wrapped forms for stricter validators.
-    return {"tasks": tasks, "items": tasks, "count": len(tasks)}
+    return list_tasks_with_graders()
 
 
 @app.get("/health")
